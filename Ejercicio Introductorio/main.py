@@ -20,12 +20,15 @@
 # - Gráfica de Mín
 # - Gráfica de Promedio
 
-import os
-from random import randint
-from random import random
-import numpy as np
+                                # Usado para:
+import os                       # Limpiar la consola
+from random import randint      # Generar numero entero aleatorio
+from random import random       # Generar numero flotante en [0, 1)
+import numpy as np              # Seleccion de ruleta basada en probabilidades
+from openpyxl import Workbook   # Crear el documento xlsx
+import agxl                     # Modulo propio para manipular rapidamente el documento xlsx
 
-# DEBUG
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones Debug \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 def debug_poblacion_inicial(poblacion):
     for individuo in poblacion:
         print(str(format(individuo, "010d")) + "\t" + format(individuo, "030b"))
@@ -42,12 +45,17 @@ def debug_generacion(poblacion, evaluaciones):
     print("Individuo | Cromosoma  | Cromosoma (binario)            | Fitness")
     for i in range(cantidad_individuos):
         print("----------+------------+--------------------------------+-------------")
-        print(str(format(i, "9d")) + " | " + str(format(poblacion[i], "010d")) + " | " + format(poblacion[i], "030b") + " | " + format(evaluaciones[i], "f"))
+        print(str(format(i, "9d")) + " | " + str(format(poblacion[i], "010d")) + " | " + format(poblacion[i], "030b") + " | " + format(evaluaciones[i], ".10f"))
         sumatoria += evaluaciones[i]
     print("----------+------------+--------------------------------+-------------")
     print("Total".rjust(9) + " |            |                                | " + format(sumatoria, "012.10f"))
-    
 
+def debug_ciclos(ciclo):
+    porcentaje = int(100 * (ciclo/ciclos))
+    barra = "#" * int(porcentaje/2) + "-" * (50 - int(porcentaje/2))
+    print("Simulacion en curso |" + barra + f"| {ciclo}/{ciclos}", end="\r")
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Debug \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #    
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Datos iniciales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 # Datos de la función
 dominio = [0, pow(2,30)-1]
 coef: float = pow(2, 30) - 1   
@@ -57,13 +65,13 @@ funcion = lambda x : x/pow(coef, 2)
 probabilidad_crossover: float = 0.75
 probabilidad_mutacion: float = 0.05
 cantidad_individuos: int = 10
-ciclos: int = 20
-generaciones: int = 200
+ciclos: int = 50
+generaciones: int = 20
 tipo_seleccion: str = "ruleta"
 tipo_crossover: str = "1_punto"
 tipo_mutacion: str = "invertida"
-
-# Funciones y modulos
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Datos iniciales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 def generar_poblacion_inicial() -> list[int]:
     poblacion: list[int] = []
     for individuo in range(cantidad_individuos):
@@ -119,9 +127,25 @@ def mutacion(hijos: list[int]) -> list[int]:
         else:
             individuos.append(hijo)
     return individuos
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Archivo XLSX \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
+# Definiendo el libro de trabajo (wb: workbook)
+wb = Workbook()
 
+# Creando las hojas "Generaciones" y "Ciclos" (ws: worksheet)
+wb.active.title = "Generaciones"
+wb.create_sheet("Ciclos")
+ws_gens = wb["Generaciones"]
+ws_cycles = wb["Ciclos"]
+
+# Formateando la primer fila y la primer columna de las hojas "Generaciones" y "Ciclos"
+agxl.generaciones_formateo(ws_gens, ciclos)
+agxl.ciclos_formateo(ws_cycles, generaciones)
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Archivo XLSX \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 # Programa
-def programa():
+def programa(ciclo: int):
     finalizar: bool = False
 
     # Generar población inicial
@@ -131,12 +155,11 @@ def programa():
     evaluaciones: list[float] = evaluacion(poblacion) ### Para debuggear este apartado, utilice 'debug_evaluaciones(poblacion)' debajo de esta línea de código
 
     ### Para visualizar los dos apartados anteriores, utilice 'debug_generacion(poblacion, evaluaciones)' debajo de esta línea de código
-    os.system('cls')
-    print("Generacion 1")
-    debug_generacion(poblacion, evaluaciones)
+    agxl.generaciones_insertar_tabla(ws_gens, ciclo, 1, poblacion, evaluaciones)
+    agxl.generaciones_insertar_grafica(ws_gens, ciclo, 1)
     
     # Repetir durante una cierta cantidad de generaciones
-    for generacion in range(generaciones):
+    for generacion in range(2, generaciones + 1):
         nueva_poblacion: list[int] = []
 
         # Repite por cada pareja de individuos de la población
@@ -160,10 +183,20 @@ def programa():
         # Se realiza la evaluación de la nueva
         evaluaciones = evaluacion(poblacion)
 
-        print(f"\nGeneracion {2+generacion}")
-        debug_generacion(poblacion, evaluaciones)
-    
-
-
+        agxl.generaciones_insertar_tabla(ws_gens, ciclo, generacion, poblacion, evaluaciones)
+        agxl.generaciones_insertar_grafica(ws_gens, ciclo, generacion)
+    agxl.ciclos_insertar_tabla(ws_cycles, ciclo, generaciones, cantidad_individuos)
+    agxl.ciclos_insertar_grafica(ws_cycles, ciclo, generaciones)
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 # Iniciar el programa
-programa()
+os.system("cls")
+print("Iniciando simulacion...") 
+debug_ciclos(0)   
+for ciclo in range(ciclos):
+    programa(ciclo)
+    debug_ciclos(ciclo + 1)
+print("Simulacion completada. |##################################################| 100%\nGenerando documento xlsx...")
+wb.save('prueba.xlsx')
+print("Documento creado con exito")
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  
