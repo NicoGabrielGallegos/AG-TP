@@ -59,13 +59,13 @@ def debug_ciclos(ciclo):
 # Datos de la función
 dominio = [0, pow(2,30)-1]
 coef: float = pow(2, 30) - 1   
-funcion = lambda x : x/pow(coef, 2)
+funcion = lambda x : pow(x/coef, 2)
 
 # Datos del algoritmo
 probabilidad_crossover: float = 0.75
 probabilidad_mutacion: float = 0.05
 cantidad_individuos: int = 10
-ciclos: int = 50
+ciclos: int = 20
 generaciones: int = 20
 tipo_seleccion: str = "ruleta"
 tipo_crossover: str = "1_punto"
@@ -196,7 +196,7 @@ debug_ciclos(0)
 for ciclo in range(ciclos):
     programa(ciclo)
     debug_ciclos(ciclo + 1)
-print("Simulacion completada. |##################################################| 100%\nGenerando documento xlsx...")
+print(f"Simulacion completada. |##################################################| {ciclos}/{ciclos}\nGenerando documento xlsx...")
 wb.save('prueba.xlsx')
 print("Documento creado con exito")
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  

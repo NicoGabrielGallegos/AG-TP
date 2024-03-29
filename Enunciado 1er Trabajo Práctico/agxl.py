@@ -57,8 +57,8 @@ def generaciones_insertar_grafica(ws, ciclo: int, generacion: int) -> None:
     insertion_row = 4 + (generacion - 1) * 13
     shift_column = (ciclo) * 6
     grafica = PieChart()
-    encabezados = Reference(ws, min_col=(2 + shift_column), min_row=(insertion_row + 4), max_row=(insertion_row + 13))
-    datos = Reference(ws, min_col=(3 + shift_column), min_row=(insertion_row + 4), max_row=(insertion_row + 13))
+    encabezados = Reference(ws, min_col=(2 + shift_column), min_row=(insertion_row + 2), max_row=(insertion_row + 11))
+    datos = Reference(ws, min_col=(3 + shift_column), min_row=(insertion_row + 2), max_row=(insertion_row + 11))
     grafica.add_data(datos, titles_from_data=False)
     grafica.set_categories(encabezados)
     grafica.legend = None
@@ -89,6 +89,7 @@ def ciclos_formateo(ws, generaciones) -> None:
 def ciclos_insertar_tabla(ws, ciclo: int, generaciones: int, cantidad_individuos: int) -> None:
     insertion_column = 2 + (ciclo) * 5
     shift_column = (ciclo) * 6
+    ws[f'{get_column_letter(insertion_column)}2'].font = Font(size=16)
     ws.cell(row=2, column=insertion_column, value=f"Ciclo {ciclo + 1}").alignment = alineamiento_centro_centro
     ws.merge_cells(start_row=2, end_row=2, start_column=insertion_column, end_column=(insertion_column + 3))
 
