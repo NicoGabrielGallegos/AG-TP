@@ -1,15 +1,24 @@
 # UTN - FRRO - ISI - Algorítmos Genéticos
 
-#### Trabajos prácticos principales
+## Trabajos prácticos principales
 
-- [Trabajo de investigación]()
+|Directorio[^1]|Readme[^2]|Lenguaje[^3]|Dependencias[^4]|
+|:-|:-|:-|:-|
+|Trabajo de investigación|README.md|||
+|[1er Trabajo Práctico](https://github.com/NicoGabrielGallegos/AG-TP/tree/main/Enunciado%201er%20Trabajo%20Práctico)|README.md|Python|1. openpyxl<br>2. numpy<br>3. agxl|
+|2do Trabajo Práctico|README.md|||
+|3er Trabajo Práctico|README.md|||
 
-- [1er Trabajo Práctico](https://github.com/NicoGabrielGallegos/AG-TP/tree/main/Enunciado%201er%20Trabajo%20Práctico)
+## Prácticas adicionales
 
-- [2do Trabajo Práctico]()
+|Directorio[^1]|Readme[^2]|Lenguaje[^3]|Dependencias[^4]|
+|:-|:-|:-|:-|
+|[Problema N-Reinas](https://github.com/NicoGabrielGallegos/AG-TP/tree/main/Otros%20ejercicios%20propuestos/Problema%20N-Reinas)|README.md|Python|-|
 
-- [3er Trabajo Práctico]()
+[^1]: Enlace directo al directorio en el que se encuentra el proyecto
 
-#### Trabajos prácticos adicionales
+[^2]: Enlace directo al documento README.md del proyecto correspondiente
 
-- [Problema N-Reinas](https://github.com/NicoGabrielGallegos/AG-TP/tree/main/Otros%20ejercicios%20propuestos/Problema%20N-Reinas)
+[^3]: Lenguaje de programación utilizado para la construcción del algoritmo
+
+[^4]: Librerías, módulos o programas necesarios para poder ejecutar el algoritmo
