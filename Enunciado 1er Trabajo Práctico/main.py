@@ -24,6 +24,7 @@
 import os                       # Limpiar la consola
 from random import randint      # Generar numero entero aleatorio
 from random import random       # Generar numero flotante en [0, 1)
+from random import getrandbits  # Generar número entero aleatorio bit a bit
 import numpy as np              # Seleccion de ruleta basada en probabilidades
 from openpyxl import Workbook   # Crear el documento xlsx
 import agxl                     # Modulo propio para manipular rapidamente el documento xlsx
@@ -75,7 +76,27 @@ tipo_mutacion: str = "invertida"
 def generar_poblacion_inicial() -> list[int]:
     poblacion: list[int] = []
     for individuo in range(cantidad_individuos):
-        poblacion.append(randint(dominio[0], dominio[1]))
+        poblacion.append(randint(dominio[0], dominio[1]))                   #| Prueba con randint
+
+        #i: str = ""                                                        #| Prueba con randint bit a bit
+        #for j in range(30):                                                #|
+        #    i += str(randint(0, 1))                                        #|
+        #poblacion.append(int(i, base=2))                                   #|
+        
+        #poblacion.append(getrandbits(30))                                  #| Prueba con getrandbits
+
+        #i: str = ""                                                        #| Prueba con getrandbits bit a bit
+        #for j in range(30):                                                #|
+        #    i += str(getrandbits(1))                                       #|
+        #poblacion.append(int(i, base=2))                                   #|
+
+        #poblacion.append(np.random.randint(dominio[0], dominio[1] + 1))    #| Prueba con numpy randint
+
+        #i: str = ""                                                        #| Prueba con numpy randint bit a bit
+        #for j in range(30):                                                #|
+        #    i += str(np.random.randint(2))                                 #|
+        #poblacion.append(int(i, base=2))                                   #|
+
     return poblacion
 
 def evaluacion(poblacion: list[int]) -> list[float]:
