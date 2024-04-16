@@ -134,14 +134,24 @@ def mutacion(hijos: list[int]) -> list[int]:
     individuos: list[int] = []
     for hijo in hijos:
         if random() < probabilidad_mutacion:
+            #individuo: str = ""
+            #puntos_cruce: int = (randint(1, 29), randint(1, 29))
+            #cadena: str = [*str(format(hijo, "030b"))]
+            #longitud_intercambiar: int = abs(puntos_cruce[0] - puntos_cruce[1])
+            #for desplazamiento in range(int((longitud_intercambiar + 1)/2)):
+            #    auxiliar: str = cadena[min(puntos_cruce) + desplazamiento]
+            #    cadena[min(puntos_cruce) + desplazamiento] = cadena[max(puntos_cruce) - desplazamiento]
+            #    cadena[max(puntos_cruce) - desplazamiento] = auxiliar
+            #for c in range(len(cadena)):
+            #    individuo += cadena[c]
+            #individuos.append(int(individuo, base=2))
             individuo: str = ""
-            puntos_cruce: int = (randint(1, 29), randint(1, 29))
-            cadena: str = [*str(format(hijo, "030b"))]
-            longitud_intercambiar: int = abs(puntos_cruce[0] - puntos_cruce[1])
-            for desplazamiento in range(int((longitud_intercambiar + 1)/2)):
-                auxiliar: str = cadena[min(puntos_cruce) + desplazamiento]
-                cadena[min(puntos_cruce) + desplazamiento] = cadena[max(puntos_cruce) - desplazamiento]
-                cadena[max(puntos_cruce) - desplazamiento] = auxiliar
+            cadena: list[str] = [*str(format(hijo, "030b"))]
+            cromosoma_invertido: int = randint(1, 29)
+            if cadena[cromosoma_invertido] == "0":
+                cadena[cromosoma_invertido] = "1"
+            else:
+                cadena[cromosoma_invertido] = "0"
             for c in range(len(cadena)):
                 individuo += cadena[c]
             individuos.append(int(individuo, base=2))
