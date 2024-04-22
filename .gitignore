@@ -9,6 +9,3 @@ __pycache__/
 
 # archivos de excel
 *.xlsx
-
-# todos los archivos de texto excepto los README
-Práctica\ propia/*.txt
