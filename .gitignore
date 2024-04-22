@@ -1,8 +1,14 @@
-# ignorar el caché de las ejecuciones de python
+# contenido en las carpetas de dependencia
+dependencias/
+
+# plantilla de python
+plantilla.py
+
+# caché de las ejecuciones de python
 __pycache__/
 
-# ignorar los archivos de excel
+# archivos de excel
 *.xlsx
 
-# ignorar el contenido en las carpetas de dependencia
-dependencias/
+# todos los archivos de texto excepto los README
+!README.txt
