@@ -1,0 +1,5 @@
+# ignorar el caché de las ejecuciones de python
+__pycache__/
+
+# ignorar los archivos de excel
+*.xlsx
