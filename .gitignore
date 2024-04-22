@@ -11,4 +11,4 @@ __pycache__/
 *.xlsx
 
 # todos los archivos de texto excepto los README
-!README.txt
+Práctica\ propia/*.txt
