@@ -2,4 +2,7 @@
 __pycache__/
 
 # ignorar los archivos de excel
-**/*.xlsx
+*.xlsx
+
+# ignorar el contenido en las carpetas de dependencia
+dependencias/
