@@ -1,4 +1,5 @@
 import random   # Librería para generar números aleatorios
+import math     # Librería para utilizar operaciones matemáticas
 
 class AlgoritmoGenetico:
     '''Algoritmo Genético'''
@@ -11,8 +12,9 @@ class AlgoritmoGenetico:
             tipo_mutacion: str = 'invertida',
             prob_crossover: float = 1,
             prob_mutacion: float = 0,
+            porcentaje_elitismo: int = 0,
+            porcentaje_seleccion: int = 0,
             cant_individuos: int = 10,
-            cant_ciclos: int = 20,
             cant_generaciones: int = 20,
             dominio: tuple[int, int] = [0, 255],
             funcion_objetivo = lambda x : x
@@ -31,20 +33,23 @@ class AlgoritmoGenetico:
         - Cant. Generaciones: 20
         - Dominio: [0, 2^8 - 1]
         - Funcion Objetivo: f(x) = x
+        - Elitismo: No
         '''
         self.tipo_seleccion: str = tipo_seleccion
         self.tipo_crossover: str = tipo_crossover
         self.tipo_mutacion: str = tipo_mutacion
         self.prob_crossover: float = prob_crossover
         self.prob_mutacion: float = prob_mutacion
+        self.porcentaje_elitismo: int = porcentaje_elitismo
+        self.porcentaje_seleccion: int = porcentaje_seleccion if self.tipo_seleccion.lower() == "torneo" else 0
         self.cant_individuos: int = cant_individuos
-        self.cant_ciclos: int = cant_ciclos
         self.cant_generaciones: int = cant_generaciones
         self.dominio: tuple[int, int] = dominio
         self.poblacion: list[int] = []
         self.poblacion_siguiente: list[int] = []
         self.list_fitness: list[float] = []
         self.funcion_objetivo = funcion_objetivo
+        self.generacion_actual: int = 0
       
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Init \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Setters y Getters \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
@@ -58,9 +63,7 @@ class AlgoritmoGenetico:
     
     def setProbMutacion(self, prob_mutacion: float) -> None: self.prob_mutacion = prob_mutacion   
     
-    def setCantIndividuos(self, cant_individuos: int) -> None: self.cant_individuos = cant_individuos       
-    
-    def setCantCiclos(self, cant_ciclos: int) -> None: self.cant_ciclos = cant_ciclos       
+    def setCantIndividuos(self, cant_individuos: int) -> None: self.cant_individuos = cant_individuos             
     
     def setCantGeneraciones(self, cant_generaciones: int) -> None: self.cant_generaciones = cant_generaciones            
     
@@ -84,9 +87,40 @@ class AlgoritmoGenetico:
             suma += self.funcion_objetivo(individuo)
         return suma
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Setters y Getters \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
+    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones Debugg \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
+    
+    def __str__(self) -> str:
+        return(f"<AlgoritmoGenético>\n"
+               f"├ Selección: {self.tipo_seleccion.capitalize() if self.tipo_seleccion.capitalize() != "Torneo" else self.tipo_seleccion.capitalize() + " ("+str(int(self.porcentaje_seleccion*100))+"%)"}\n"
+               f"├ Crossover: {self.tipo_crossover.capitalize()} ({int(self.prob_crossover*100)}%)\n"
+               f"├ Mutación: {self.tipo_mutacion.capitalize()} ({int(self.prob_mutacion*100)}%)\n"
+               f"├ Elitismo: {"No" if self.porcentaje_elitismo == 0 else int(self.porcentaje_elitismo*100)}\n"
+               f"├ Individuos: {self.cant_individuos}\n"
+               f"└ Generaciones: {self.cant_generaciones}")
+
+    #    return(f"AlgoritmoGenético[\n"
+    #           f"Selección: {self.tipo_seleccion.capitalize()},\n"
+    #           f"Crossover: {self.tipo_crossover.capitalize()} ({int(self.prob_crossover*100)}%),\n"
+    #           f"Mutación: {self.tipo_mutacion.capitalize()} ({int(self.prob_mutacion*100)}%),\n"
+    #           f"Elitismo: {"No" if self.porcentaje_elitismo == 0 else int(self.porcentaje_elitismo*100)},\n"
+    #           f"Individuos: {self.cant_individuos},\n"
+    #           f"Generaciones: {self.cant_generaciones}"
+    #           f"]")
+
+    #    return(f"AlgoritmoGenético["
+    #           f"Selección: {self.tipo_seleccion.capitalize()}, "
+    #           f"Crossover: {self.tipo_crossover.capitalize()} ({int(self.prob_crossover*100)}%), "
+    #           f"Mutación: {self.tipo_mutacion.capitalize()} ({int(self.prob_mutacion*100)}%), "
+    #           f"Elitismo: {"No" if self.porcentaje_elitismo == 0 else int(self.porcentaje_elitismo*100)}, "
+    #           f"Individuos: {self.cant_individuos}, "
+    #           f"Generaciones: {self.cant_generaciones}"
+    #           f"]")
+    
+    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Debugg \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones Principales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     def generarPoblacionInicial(self) -> None:
         '''Genera la población inicial del Algoritmo Genético'''
+        self.generacion_actual = 1
         poblacion: list[int] = []
         for individuo in range(self.cant_individuos):
             poblacion.append(random.randint(self.dominio[0], self.dominio[1]))
@@ -109,9 +143,20 @@ class AlgoritmoGenetico:
                     acum += self.list_fitness[i]
                     if acum > pelota:
                         return self.poblacion[i]
+            case 'torneo':
+                indices_disponibles: list[int] = [i for i in range(self.cant_individuos)]
+                individuos_seleccionados: list[int] = []
+                for i in range(math.ceil(self.cant_individuos*self.porcentaje_seleccion)):
+                    indice_aleatorio: int = random.randint(0, len(indices_disponibles) - 1)
+                    individuos_seleccionados.append(self.poblacion[indices_disponibles[indice_aleatorio]])
+                    indices_disponibles.pop(indice_aleatorio)
+                print(f"Individuos seleccionados al azar: {individuos_seleccionados}")
+                mejor_individuo: int = self.devolverMejores(1, *individuos_seleccionados)
+                return mejor_individuo[0]
     
     def crossover(self, padre: int, madre: int) -> tuple[int, int]:
         '''Cruza (o no) la información genética de dos individuos y devuelve dos nuevos individuos'''
+        print(f"Padre: {padre}, Madre: {madre}")
         if random.random() < self.prob_crossover:
             hijo_uno: str = ""
             hijo_dos: str = ""
@@ -127,10 +172,8 @@ class AlgoritmoGenetico:
                     for bit in range(len(bits_hijo_uno)):
                         hijo_uno += bits_hijo_uno[bit]
                         hijo_dos += bits_hijo_dos[bit]
-                    print("Return verdadero")
                     return(int(hijo_uno, base=2), int(hijo_dos, base=2))
         else:
-            print("Return falso")
             return (padre, madre)
 
     def mutation(self, *individuos: int) -> list[int]:
@@ -152,22 +195,44 @@ class AlgoritmoGenetico:
         return individuos_mutados
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Principales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones Adicionales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
-    def nuevaGeneracion(self):
-        for i in range(int(self.cant_individuos/2)):
-            self.cicloReproductivo()
-        for individuo in range(self.cant_individuos):
-            print(f"{individuo}\n{self.poblacion}\n{self.poblacion_siguiente}\n\n")
-            self.poblacion[individuo] = self.poblacion_siguiente[individuo]
-        self.poblacion_siguiente = []
+    def nuevaGeneracion(self) -> bool:
+        '''Avanza hacia la siguiente generación si puede y retorna True. Si no puede, retorna False'''
+        if self.generacion_actual < self.cant_generaciones:
+            cantidad_por_elitismo:int = math.ceil(self.cant_individuos * self.porcentaje_elitismo)
+            for i in range(int((self.cant_individuos - cantidad_por_elitismo) / 2)):
+                self.cicloReproductivo()
+            if self.porcentaje_elitismo > 0:
+                a = self.devolverMejores(cantidad_por_elitismo, *self.poblacion)
+                self.poblacion_siguiente.extend(a)
+            for individuo in range(self.cant_individuos):
+                self.poblacion[individuo] = self.poblacion_siguiente[individuo]
+            self.poblacion_siguiente = []
+            self.generacion_actual += 1
+            return True
+        return False
     
-    def cicloReproductivo(self):
+    def cicloReproductivo(self) -> None:
+        '''Selecciona a dos individuos, intenta realizar el cruce, intenta realizar la mutación y luego inserta a los individuos en la nueva población'''
         padre, madre = self.selection(), self.selection()   # Seleccionar
         hijos = self.crossover(padre, madre)                # Cruzar
         hijos = self.mutation(*hijos)                       # Mutar
-        print(f"Hijos: {hijos}\n")
         self.poblacion_siguiente.extend(hijos)             # Insertar
+    
+    def devolverMejores(self, cantidad:int, *individuos_tuple:int) -> list[int]:
+        '''Dados una cantidad N y un conjunto de individuos, devuelve los N individuos más valiosos (referido al valor de la función objetivo)'''
+        individuos: list[int] = []
+        individuos.extend(individuos_tuple)
+        for i in range(0, len(individuos) - 1):
+            for j in range(i, len(individuos)):
+                if self.funcion_objetivo(individuos[i]) < self.funcion_objetivo(individuos[j]):
+                    individuo_auxiliar = individuos[i]
+                    individuos[i] = individuos[j]
+                    individuos[j] = individuo_auxiliar
+        mejores_n_individuos: list[int] = []
+        for i in range(cantidad):
+            mejores_n_individuos.append(individuos[i])
+        return mejores_n_individuos
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Adicionales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
-
 
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ X \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ X \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  

@@ -70,7 +70,7 @@ os.system("cls")
 configuraciones = {"A": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0, 0],
                    "B": ['torneo', '1pto', 'invertida', 0.75, 0.05, 0, 0.4],
                    "C": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0.2, 0]}
-for opcion in ["B"]:
+for opcion in ["A", "B", "C"]:
     print(f"Iniciando simulación {opcion}...")
     for ciclo in range(ciclos):
         ag_i = pygen.AlgoritmoGenetico(*configuraciones[opcion], cantidad_individuos, generaciones, dominio, funcion)
