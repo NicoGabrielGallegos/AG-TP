@@ -54,7 +54,6 @@ agxl.ciclos_formateo(ws_cycles, generaciones)
 def programa(ag: pygen.AlgoritmoGenetico, ciclo: int):
     ag.generarPoblacionInicial()
     ag.fitness()
-
     agxl.generaciones_insertar_tabla(ws_gens, ciclo, 1, ag.poblacion, ag.list_fitness)
     agxl.generaciones_insertar_grafica(ws_gens, ciclo, 1)
     for generacion in range(2, generaciones + 1):
@@ -68,22 +67,17 @@ def programa(ag: pygen.AlgoritmoGenetico, ciclo: int):
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 os.system("cls")
-#configuraciones = {"A": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0],
-#                   "B": ['torneo', '1pto', 'invertida', 0.75, 0.05, 0],
-#                   "C": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0.2]}
-#for opcion in ["A", "B", "C"]:
-#    print(f"Iniciando simulación {opcion}...")
-#    for ciclo in range(ciclos):
-#        ag_A = pygen.AlgoritmoGenetico(*configuraciones[opcion], cantidad_individuos, ciclos, generaciones, dominio, funcion)
-#        print(f"Ciclo {ciclo}")
-#        programa(ag_A, ciclo)
-#    print(f"Simulación {opcion} completada.")
-#    wb.save(f"Resultados_{opcion}.xlsx")
-#    print(f"Documento \"Resultados_{opcion}.xlsx\" creado con éxito")
-ag_A = pygen.AlgoritmoGenetico('torneo', '1pto', 'invertida', 0.75, 0.05, 0, 0.4, cantidad_individuos, generaciones, dominio, funcion)
-print(str(ag_A))
-ag_A.generarPoblacionInicial()
-print(ag_A.poblacion)
-ag_A.devolverMejores(1, 8, 12, 6)
-print(f"Mejor individuo del torneo: {ag_A.selection()}")
+configuraciones = {"A": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0, 0],
+                   "B": ['torneo', '1pto', 'invertida', 0.75, 0.05, 0, 0.4],
+                   "C": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0.2, 0]}
+for opcion in ["B"]:
+    print(f"Iniciando simulación {opcion}...")
+    for ciclo in range(ciclos):
+        ag_i = pygen.AlgoritmoGenetico(*configuraciones[opcion], cantidad_individuos, generaciones, dominio, funcion)
+        print(f"Ciclo {ciclo}")
+        programa(ag_i, ciclo)
+    print(f"Simulación {opcion} completada.")
+    wb.save(f"Resultados_{opcion}.xlsx")
+    print(f"Documento \"Resultados_{opcion}.xlsx\" creado con éxito")
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  
