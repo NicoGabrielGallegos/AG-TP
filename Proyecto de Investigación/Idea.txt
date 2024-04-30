@@ -1,0 +1,33 @@
+¿Cuál es la configuración óptima para resolver un circuito de compuertas lógicas dada su tabla de verdad y las compuertas disponibles?
+(Tabla de verdad de ejemplo: tabla de verdad de un led de 7 segmentos para mostrar los números del 0 al 9)
+
+Parámetros a tener en cuenta:
+Mirando la tabla de verdad, se determina la forma canónica algebráica más óptima
+
+Para tener en cuenta en la función objetivo:
+- Cantidad de compuertas binarias usadas (x1)
+- Cantidad de compuertas NOT usadas (x0.5)
+- Cantidad de líneas de la tabla de verdad satisfecha (x2)
+- Cantidad de salidas correctas en su totalidad (x4)
+
+Población:
+- Conjunto de compuertas lógicas conectadas entre sí.
+  Una compuerta lógica puede tener en su entrada otra compuerta lógica o una entrada directa.
+  Todas las entradas y compuertas deben desembocar finalmente en una última compuerta.
+
+Tipos de Crossover:
+- Los individuos de la población se intercambiarán entre sí sus compuertas y sus entradas
+
+Tipos de Mutación:
+- Mutar una entrada con NOT
+- Mutar la entrada de una compuerta cambiándola por otra
+
+Formato de ingreso de la tabla de verdad:
+{
+0 0 : 1;
+0 1 : 0;
+1 0 : 1;
+1 1 : x;
+}
+
+RegEx: {((0|1)+:(0|1|x)+;)+}
