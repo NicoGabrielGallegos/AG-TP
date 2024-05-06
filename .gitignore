@@ -1,8 +1,9 @@
+# archivos locales
+_local/
+
 # plantilla de python
 plantilla.py
 
 # caché de las ejecuciones de python
 __pycache__/
 
-# archivos de excel
-*.xlsx
