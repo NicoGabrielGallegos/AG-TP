@@ -88,7 +88,6 @@ class AlgoritmoGenetico:
         return suma
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Setters y Getters \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones Debugg \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
-    
     def __str__(self) -> str:
         return(f"<AlgoritmoGenético>\n"
                f"├ Selección: {self.tipo_seleccion.capitalize() if self.tipo_seleccion.capitalize() != "Torneo" else self.tipo_seleccion.capitalize() + " ("+str(int(self.porcentaje_seleccion*100))+"%)"}\n"
@@ -97,25 +96,6 @@ class AlgoritmoGenetico:
                f"├ Elitismo: {"No" if self.porcentaje_elitismo == 0 else int(self.porcentaje_elitismo*100)}\n"
                f"├ Individuos: {self.cant_individuos}\n"
                f"└ Generaciones: {self.cant_generaciones}")
-
-    #    return(f"AlgoritmoGenético[\n"
-    #           f"Selección: {self.tipo_seleccion.capitalize()},\n"
-    #           f"Crossover: {self.tipo_crossover.capitalize()} ({int(self.prob_crossover*100)}%),\n"
-    #           f"Mutación: {self.tipo_mutacion.capitalize()} ({int(self.prob_mutacion*100)}%),\n"
-    #           f"Elitismo: {"No" if self.porcentaje_elitismo == 0 else int(self.porcentaje_elitismo*100)},\n"
-    #           f"Individuos: {self.cant_individuos},\n"
-    #           f"Generaciones: {self.cant_generaciones}"
-    #           f"]")
-
-    #    return(f"AlgoritmoGenético["
-    #           f"Selección: {self.tipo_seleccion.capitalize()}, "
-    #           f"Crossover: {self.tipo_crossover.capitalize()} ({int(self.prob_crossover*100)}%), "
-    #           f"Mutación: {self.tipo_mutacion.capitalize()} ({int(self.prob_mutacion*100)}%), "
-    #           f"Elitismo: {"No" if self.porcentaje_elitismo == 0 else int(self.porcentaje_elitismo*100)}, "
-    #           f"Individuos: {self.cant_individuos}, "
-    #           f"Generaciones: {self.cant_generaciones}"
-    #           f"]")
-    
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Debugg \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Funciones Principales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
     def generarPoblacionInicial(self) -> None:
@@ -150,13 +130,11 @@ class AlgoritmoGenetico:
                     indice_aleatorio: int = random.randint(0, len(indices_disponibles) - 1)
                     individuos_seleccionados.append(self.poblacion[indices_disponibles[indice_aleatorio]])
                     indices_disponibles.pop(indice_aleatorio)
-                print(f"Individuos seleccionados al azar: {individuos_seleccionados}")
                 mejor_individuo: int = self.devolverMejores(1, *individuos_seleccionados)
                 return mejor_individuo[0]
     
     def crossover(self, padre: int, madre: int) -> tuple[int, int]:
         '''Cruza (o no) la información genética de dos individuos y devuelve dos nuevos individuos'''
-        print(f"Padre: {padre}, Madre: {madre}")
         if random.random() < self.prob_crossover:
             hijo_uno: str = ""
             hijo_dos: str = ""
@@ -232,8 +210,4 @@ class AlgoritmoGenetico:
         for i in range(cantidad):
             mejores_n_individuos.append(individuos[i])
         return mejores_n_individuos
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Adicionales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
-
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ X \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
-    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ X \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  
-
+    # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Funciones Adicionales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #

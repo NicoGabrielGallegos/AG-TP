@@ -86,47 +86,55 @@ def ciclos_formateo(ws, generaciones) -> None:
         ws.row_dimensions[row + 2].height = 23
 
 # Insertar la tabla de un ciclo
-def ciclos_insertar_tabla(ws, ciclo: int, generaciones: int, cantidad_individuos: int) -> None:
-    insertion_column = 2 + (ciclo) * 5
+def ciclos_insertar_tabla(ws, ws_gens, ciclo: int, generaciones: int, cantidad_individuos: int) -> None:
+    insertion_column = 2 + (ciclo) * 6
     shift_column = (ciclo) * 6
     ws[f'{get_column_letter(insertion_column)}2'].font = Font(size=16)
     ws.cell(row=2, column=insertion_column, value=f"Ciclo {ciclo + 1}").alignment = alineamiento_centro_centro
     ws.merge_cells(start_row=2, end_row=2, start_column=insertion_column, end_column=(insertion_column + 3))
 
-    for relative_column in range(4):
+    for relative_column in range(5):
         absolute_column = insertion_column + relative_column
-        ws.cell(row=12, column=absolute_column, value=("Generacion", "Maximo", "Minimo", "Promedio")[relative_column]).alignment = alineamiento_centro_centro
+        ws.cell(row=12, column=absolute_column, value=("Generacion", "Cromosoma Maximo", "Maximo", "Minimo", "Promedio")[relative_column]).alignment = alineamiento_centro_centro
         ws.column_dimensions[get_column_letter(absolute_column)].width = 20.71
 
     for relative_row in range(generaciones):
         absolute_row = 13 + relative_row
         ws.cell(row=absolute_row, column=insertion_column, value=(str(relative_row + 1) + ".")).alignment = alineamiento_centro_centro
         ws.cell(row=absolute_row, column=(insertion_column + 1), value=f"=MAX(Generaciones!{get_column_letter(3 + shift_column)}{6 + relative_row * 13}:{get_column_letter(3 + shift_column)}{15 + relative_row * 13})").alignment = alineamiento_centro_centro
-        ws.cell(row=absolute_row, column=(insertion_column + 2), value=f"=MIN(Generaciones!{get_column_letter(3 + shift_column)}{6 + relative_row * 13}:{get_column_letter(3 + shift_column)}{15 + relative_row * 13})").alignment = alineamiento_centro_centro
-        ws.cell(row=absolute_row, column=(insertion_column + 3), value=f"=SUM(Generaciones!{get_column_letter(3 + shift_column)}{6 + relative_row * 13}:{get_column_letter(3 + shift_column)}{15 + relative_row * 13})/{cantidad_individuos}").alignment = alineamiento_centro_centro
+        ws.cell(row=absolute_row, column=(insertion_column + 2), value=f"=(MAX(Generaciones!{get_column_letter(3 + shift_column)}{6 + relative_row * 13}:{get_column_letter(3 + shift_column)}{15 + relative_row * 13})/(2^30 - 1))^2").alignment = alineamiento_centro_centro
+        ws.cell(row=absolute_row, column=(insertion_column + 3), value=f"=(MIN(Generaciones!{get_column_letter(3 + shift_column)}{6 + relative_row * 13}:{get_column_letter(3 + shift_column)}{15 + relative_row * 13})/(2^30 - 1))^2").alignment = alineamiento_centro_centro
+        
+        promedio = 0
+        for relative_gen in range(6, 16):
+            promedio += pow((ws_gens[f"{get_column_letter(3 + shift_column)}{relative_gen + relative_row * 13}"].value)/(pow(2, 30) - 1), 2)
+        promedio /= cantidad_individuos
+        
+        ws.cell(row=absolute_row, column=(insertion_column + 4), value=promedio).alignment = alineamiento_centro_centro
     return
 
 # Insertar la gráfica de un ciclo
 def ciclos_insertar_grafica(ws, ciclo: int, generaciones: int):
-    insertion_column = 2 + (ciclo) * 5
+    insertion_column = 2 + (ciclo) * 6
     grafica = LineChart()
     grafica.title = None
     grafica.style = 10
     grafica.y_axis.title = None
     grafica.x_axis.title = None
-    datos = Reference(ws, min_col=(insertion_column + 1), max_col=(insertion_column + 3), min_row=12, max_row=(12 + generaciones))
+    datos = Reference(ws, min_col=(insertion_column + 2), max_col=(insertion_column + 4), min_row=12, max_row=(12 + generaciones))
     grafica.add_data(datos, titles_from_data=True)
     grafica.legend.position = 't'
 
     for serie in grafica.series:
-        serie.marker.symbol = "circle"
+        if generaciones < 21:
+            serie.marker.symbol = "circle"
         serie.graphicalProperties.line.width = 20000
         #serie.graphicalProperties.line.noFill = True
 
     anclaje = TwoCellAnchor()
     anclaje._from.col = insertion_column - 1
     anclaje._from.row = 2
-    anclaje.to.col = insertion_column + 3
+    anclaje.to.col = insertion_column + 4
     anclaje.to.row = 11
     grafica.anchor = anclaje
 

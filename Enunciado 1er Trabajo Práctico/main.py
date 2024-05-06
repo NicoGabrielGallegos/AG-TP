@@ -48,7 +48,6 @@ ws_cycles = wb["Ciclos"]
 # Formateando las hojas "Generaciones" y "Ciclos"
 agxl.generaciones_formateo(ws_gens, ciclos)
 agxl.ciclos_formateo(ws_cycles, generaciones)
-
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Archivo XLSX \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #   
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 def programa(ag: pygen.AlgoritmoGenetico, ciclo: int):
@@ -61,11 +60,10 @@ def programa(ag: pygen.AlgoritmoGenetico, ciclo: int):
         ag.fitness()
         agxl.generaciones_insertar_tabla(ws_gens, ciclo, generacion, ag.poblacion, ag.list_fitness)
         agxl.generaciones_insertar_grafica(ws_gens, ciclo, generacion)
-    agxl.ciclos_insertar_tabla(ws_cycles, ciclo, generaciones, cantidad_individuos)
+    agxl.ciclos_insertar_tabla(ws_cycles, ws_gens, ciclo, generaciones, cantidad_individuos)
     agxl.ciclos_insertar_grafica(ws_cycles, ciclo, generaciones)  
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
-
 os.system("cls")
 configuraciones = {"A": ['ruleta', '1pto', 'invertida', 0.75, 0.05, 0, 0],
                    "B": ['torneo', '1pto', 'invertida', 0.75, 0.05, 0, 0.4],
@@ -79,5 +77,4 @@ for opcion in ["A", "B", "C"]:
     print(f"Simulación {opcion} completada.")
     wb.save(f"Resultados_{opcion}.xlsx")
     print(f"Documento \"Resultados_{opcion}.xlsx\" creado con éxito")
-
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #  
