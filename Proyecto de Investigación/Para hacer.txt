@@ -1,3 +1,0 @@
-Sustitución de compuertas innecesarias
-Ejemplo:
-NOT A OR NOT B -> A NAND B
