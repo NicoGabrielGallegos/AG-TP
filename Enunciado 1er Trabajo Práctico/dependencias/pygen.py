@@ -74,7 +74,7 @@ class AlgoritmoGenetico:
     def getIndividuo(self, indice: int) -> int: return self.poblacion[indice]
  
     def getSumaIndividuos(self) -> int:
-        '''Devuelve la suma de los valores de todos cada individuo de la población'''
+        '''Devuelve la suma de los valores de cada individuo de la población'''
         suma: int = 0
         for individuo in self.poblacion:
             suma += individuo
@@ -117,11 +117,11 @@ class AlgoritmoGenetico:
         '''Devuelve un individuo utilizando el método de selección del Algoritmo Genético'''
         match self.tipo_seleccion:
             case 'ruleta':
-                pelota: float = random.random()
+                seleccionado: float = random.random()
                 acum: float = 0
                 for i in range(self.cant_individuos):
                     acum += self.list_fitness[i]
-                    if acum > pelota:
+                    if acum > seleccionado:
                         return self.poblacion[i]
             case 'torneo':
                 indices_disponibles: list[int] = [i for i in range(self.cant_individuos)]
@@ -194,7 +194,7 @@ class AlgoritmoGenetico:
         padre, madre = self.selection(), self.selection()   # Seleccionar
         hijos = self.crossover(padre, madre)                # Cruzar
         hijos = self.mutation(*hijos)                       # Mutar
-        self.poblacion_siguiente.extend(hijos)             # Insertar
+        self.poblacion_siguiente.extend(hijos)              # Insertar
     
     def devolverMejores(self, cantidad:int, *individuos_tuple:int) -> list[int]:
         '''Dados una cantidad N y un conjunto de individuos, devuelve los N individuos más valiosos (referido al valor de la función objetivo)'''
