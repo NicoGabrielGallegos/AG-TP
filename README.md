@@ -5,7 +5,7 @@
 |Directorio[^1]|Readme[^2]|Lenguaje[^3]|Dependencias[^4]|
 |:-|:-|:-|:-|
 |Trabajo de investigación|README.md|||
-|[1er Trabajo Práctico](https://github.com/NicoGabrielGallegos/AG-TP/tree/main/Enunciado%201er%20Trabajo%20Práctico)|README.md|Python|1. openpyxl<br>2. numpy|
+|[1er Trabajo Práctico](https://github.com/NicoGabrielGallegos/AG-TP/tree/main/Enunciado%201er%20Trabajo%20Práctico)|README.md|Python|1. openpyxl<br>2. pygen<br>3. agxl|
 |2do Trabajo Práctico|README.md|||
 |3er Trabajo Práctico|README.md|||
 
