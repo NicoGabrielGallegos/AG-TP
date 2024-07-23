@@ -45,7 +45,7 @@
 
                                                     # Usado para:
 import os                                           # Limpiar la consola
-from pysearch import BagItem, Bag, ExhaustiveSearch
+from pysearch import BagItem, Bag, Search, ExhaustiveSearch, GreedySearch
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Datos iniciales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 # Objetos del 1er problema
@@ -88,3 +88,14 @@ s.evaluate_possibilities()
 s.table_header("Optimum Candidates")
 for o in s.optimum:
     s.print_possibility(o)
+
+#bag = Bag(7)
+#items = [BagItem(4, 4), BagItem(5, 2), BagItem(3, 6)]
+#
+#g = GreedySearch(bag, items, "Hola")
+#
+#g.order_by_vwr()
+#
+#g.set_optimum_bag()
+#
+#g.print_optimum()

@@ -2,84 +2,120 @@ import math # Librería para utilizar operaciones matemáticas
 import copy # Librería para copiar objetos
 
 class BagItem:
-    ''' Item con beneficio/valor "v" y peso/volumen "w"'''
-    
+    '''Objeto con Peso o Volumen "w" y Valor "v"'''
+
     serial_number: int = 1
 
-    def __init__(self, w: float = 1, v: float = 1, name: str | None = None) -> None:
-        self.set_name(name)
-        self.set_weight(w)
-        self.set_value(v)
+    def __init__(self, w: float = 1, v: float = 1, id: str | None = None) -> None:
+        self.id = id
+        self.weight = w
+        self.value = v
 
-    def set_name(self, name: str | None) -> None:
-        if name is None:
-            self.name = f"{BagItem.serial_number}"
+    @property
+    def id(self) -> str:
+        '''Nombre del objeto'''
+        return self._id
+    
+    @id.setter
+    def id(self, id: str | None) -> None:
+        if id is None:
+            self._id = f"{BagItem.serial_number}"
             BagItem.serial_number += 1
         else:
-            self.name = name
+            self._id = id
     
-    def set_value(self, v: float) -> None:
-        self.value: float = v if v >= 0 else 0
+    @property
+    def weight(self) -> float:
+        '''Peso o Volumen del objeto'''
+        return self._weight
+    
+    @weight.setter
+    def weight(self, w: float) -> None:
+        self._weight: float = w if w >= 0 else 0
 
-    def set_weight(self, w: float) -> None:
-        self.weight: float = w if w >= 0 else 0
+    @property
+    def value(self) -> float:
+        '''Valor del objeto'''
+        return self._value
     
-    def get_name(self) -> float:
-        return self.name
-    
-    def get_value(self) -> float:
-        return self.value
-    
-    def get_weight(self) -> float:
-        return self.weight
+    @value.setter
+    def value(self, v: float) -> None:
+        self._value: float = v if v >= 0 else 0
 
+    @property
+    def value_weight_ratio(self) -> float:
+        '''Beneficio del objeto'''
+        return self.value / self.weight
+    
     def __str__(self) -> str:
-        return self.get_name()
+        return self.id
 
 class Bag:
-    ''' Mochila de items con un peso/volumen máximo w_max'''
-    def __init__(self, w_max: float = 1) -> None:
+    '''Mochila de objetos con un Peso o Volumen máximo'''
+    def __init__(self, max_w: float = 1) -> None:
+        self.max_weight: float = max_w
         self.items: list[BagItem] = []
-        self.set_max_weight(w_max)
+
+    @property
+    def max_weight(self) -> float:
+        return self._max_weight
     
+    @max_weight.setter
+    def max_weight(self, max_w: float) -> None:
+        self._max_weight = max_w
+
+    @property
+    def items(self) -> list[BagItem]:
+        return self._items
+    
+    @items.setter
+    def items(self, items: list[BagItem]) -> None:
+        self._items = copy.deepcopy(items)
+
+    def __getitem__(self, index: int):
+        return self._items[index]
+    
+    def __setitem__(self, index: int, value: BagItem):
+        self._items[index] = value
+
+    def append(self, item: BagItem):
+        self._items.append(item)
+
+    def pop_last(self) -> BagItem | bool:
+        if len(self._items) > 0:
+            return self._items.pop()
+        else:
+            return False
+
     def empty_bag(self) -> None:
-        self.items: list[BagItem] = []
+        self._items = []
 
-    def set_max_weight(self, w_max: float) -> None:
-        self.w_max: float = w_max
-    
-    def add_item(self, item: BagItem) -> None:
-        self.items.append(item)
-    
-    def remove_last_item(self) -> None:
-        if len(self.items) > 0:
-            self.items.pop()
+    @property
+    def item_quantity(self) -> int:
+        return len(self._items)
 
-    def get_item(self, index: int) -> BagItem:
-        return self.items[index]
+    @property
+    def total_value(self) -> float:
+        t_v: float = 0
+        for item in self._items:
+            t_v += item.value
+        return t_v
 
-    def get_items(self) -> list[BagItem]:
-        return self.items
-    
-    def get_total_value(self) -> float:
-        total_value: float = 0
-        for item in self.items:
-            total_value += item.get_value()
-        return total_value
+    @property
+    def total_weight(self) -> float:
+        t_w: float = 0
+        for item in self._items:
+            t_w += item.weight
+        return t_w
 
-    def get_total_weight(self) -> float:
-        total_weight: float = 0
-        for item in self.items:
-            total_weight += item.get_weight()
-        return total_weight
-
+    @property
     def is_valid(self) -> bool:
-        return False if self.get_total_weight() > self.w_max else True
+        return False if self.total_weight > self._max_weight else True
     
     def __str__(self, colors: bool = True) -> str:
         if colors:
             COLOR_END = "\33[0m"
-            if self.is_valid():
+            if self.is_valid:
                 ITEM_COLOR = COLOR_END
                 BAG_COLOR = "\33[94m" # Celeste
             else:
@@ -87,115 +123,142 @@ class Bag:
         else :
             COLOR_END = ITEM_COLOR = BAG_COLOR = ""
 
-        s = BAG_COLOR + "Bag("
-        if(len(self.items) > 0):
-            for i in range(len(self.items) - 1):
-                s += ITEM_COLOR + str(self.items[i]) + BAG_COLOR + ", "
-            s += ITEM_COLOR + str(self.items[-1])
-        s += BAG_COLOR + ")" + COLOR_END
+        s = BAG_COLOR + "Mochila("
+        if self.item_quantity > 0:
+            for index in range(self.item_quantity - 1):
+                s += f"{ITEM_COLOR}{self[index]}{BAG_COLOR}, "
+            s += f"{ITEM_COLOR}{self[-1]}"
+        s += f"{BAG_COLOR}){COLOR_END}"
+
         return s
 
-class ExhaustiveSearch:
+class Search:
     '''
-    Clase que implementa las funciones necesarias para
-    resolver un problema de optimización combinatoria
+    Clase base para implementar algoritmos de
+    búsquedas exhaustivas o heurísticas
     '''
 
-    def __init__(self, bag: Bag, items: list[BagItem], file_name: str) -> None:
-        self.bag: Bag = bag
+    def __init__(self, bag: Bag, items: list[BagItem]) -> None:
+        self.bag = bag
         self.items: list[BagItem] = items
-        self.optimum: list[Bag] = []
-        self.file_name: str = file_name
-        self.init_txt()
-
-    def init_txt(self) -> None:
-        with open(self.file_name + ".txt", "w") as f:
-            f.write(f"Exhaustive Search - {self.file_name}:\n\n")
-            f.write(f"Searching for: max Value\nCondition: Weight < {self.bag.w_max}\nUsing the following objects:\n")
-            f.write(f"-------+--------+------\nObject | Weight | Value\n-------+--------+------\n")
-            for item in self.items:
-                f.write(f"{item.get_name()}".rjust(6, " ") + " | ")
-                f.write(f"{item.get_weight():6} | ")
-                f.write(f"{item.get_value():5}\n")
-            f.write("-------+--------+------\n\nResults:\n")
-
-    def set_bag(self, bag: Bag) -> None:
-        self.bag: Bag = bag
-
-    def get_bag(self) -> Bag:
-        return self.bag
+        self.optimums: list[Bag] = []
     
-    def get_bag_value(self) -> float:
-        return self.bag.get_total_value()
-    
-    def get_bag_items(self) -> list[BagItem]:
-        return self.bag.get_items()
+    @property
+    def bag(self) -> Bag:
+        return self._bag
 
-    def set_items(self, items: list[BagItem]) -> None:
-        self.items: list[BagItem] = items
+    @bag.setter
+    def bag(self, bag: Bag) -> None:
+        self._bag = bag
 
-    def get_item(self, index: int) -> BagItem:
-        return self.items[index]
+    @property
+    def items(self) -> list[BagItem]:
+        return self._items
 
-    def get_items_quantity(self) -> int:
-        return len(self.items)
+    @items.setter
+    def items(self, items: list[BagItem]) -> None:
+        self._items = copy.deepcopy(items)
     
-    def set_new_optimum(self, bag: Bag) -> None:
-        self.optimum = [bag]
+    @property
+    def item_quantity(self) -> int:
+        return len(self._items)
+
+    @property
+    def node_value(self) -> float:
+        return self._bag.total_value
     
-    def append_optimum(self, bag: Bag) -> None:
-        self.optimum.append(bag)
+    @property
+    def node_items(self) -> float:
+        return self._bag.items
     
-    def print_possibility(self, specific_bag: Bag | None = None) -> None:
-        COLOR_END = "\33[0m"
-        if self.bag.is_valid():
-            WEIGHT_COLOR = "\33[95m" # 
-            VALUE_COLOR = "\33[92m" # 
+    @property
+    def optimums(self) -> list[Bag]:
+        return self._optimums
+
+    @optimums.setter
+    def optimums(self, bags: list[Bag]) -> None:
+        self._optimums = bags
+    
+    def __getitem__(self, index: int):
+        return self._optimums[index]
+    
+    def __setitem__(self, index: int, value: BagItem):
+        self._optimums[index] = value
+
+    def append(self, bag: Bag):
+        self._optimums.append(copy.deepcopy(bag))
+
+    
+
+class ExhaustiveSearch(Search):
+    '''
+    Funciones necesarias para resolver un
+    problema de optimización combinatoria
+    '''
+
+    def __init__(self, bag: Bag, items: list[BagItem]) -> None:
+        super().__init__(bag, items)
+
+    def print_node(self, bag: Bag | None = None, colors: bool = True) -> None:
+        if colors:
+            COLOR_END = "\33[0m"
+            if self._bag.is_valid:
+                WEIGHT_COLOR = "\33[95m"
+                VALUE_COLOR = "\33[92m"
+            else:
+                WEIGHT_COLOR = VALUE_COLOR = "\33[90m"
         else:
-            WEIGHT_COLOR = VALUE_COLOR = "\33[90m" # Gris
+            COLOR_END = WEIGHT_COLOR = VALUE_COLOR = ""
 
-        bag = self.bag if specific_bag is None else specific_bag
+        if bag is None:
+            bag = self._bag
 
-        self.insert_into_txt(specific_bag)
+        print(WEIGHT_COLOR + f"{bag.total_weight:6}" + COLOR_END, end=" | ")
+        print(VALUE_COLOR + f"{bag.total_value:5}" + COLOR_END, end=" | ")
+        print(bag.__str__(colors))
 
-        print(WEIGHT_COLOR + f"{bag.get_total_weight():6}" + COLOR_END, end=" | ")
-        print(VALUE_COLOR + f"{bag.get_total_value():5}" + COLOR_END, end=" | ")
-        print(bag)
-    
-    def insert_into_txt(self, specific_bag: Bag | None = None) -> None:
-        bag = self.bag if specific_bag is None else specific_bag
-        with open(self.file_name + ".txt", "a") as f:
-            f.write(f"{bag.get_total_weight():6} | "
-                    f"{bag.get_total_value():5} | "
-                    f"{bag.__str__(False)}\n")
-
-    def evaluate_possibilities(self, from_index: int = 0, to_index: int = -1) -> None:
+    def search(self, from_index: int = 0, to_index: int = -1) -> None:
         if to_index == -1 or to_index + 1 > len(self.items):
-            to_index = len(self.items) - 1
+            to_index = self.item_quantity - 1
+
+        self.print_node()
         
-        self.print_possibility()
-
-        if self.bag.is_valid():
-            if not self.optimum or self.bag.get_total_value() > self.optimum[0].get_total_value():
-                self.set_new_optimum(copy.deepcopy(self.bag))
-            elif self.bag.get_total_value() == self.optimum[0].get_total_value():
-                self.append_optimum(copy.deepcopy(self.bag))
-
+        if self._bag.is_valid:
+            if not self._optimums or self._bag.total_value > self[0].total_value:
+                self.optimums = [copy.deepcopy(self._bag)]
+            elif self._bag.total_value == self[0].total_value:
+                self.append(self._bag)
+        
         for index in range(from_index, to_index + 1):
-            self.bag.add_item(self.get_item(index))
-            self.evaluate_possibilities(index+1, to_index)
-        self.bag.remove_last_item()
+            self._bag.append(self._items[index])
+            self.search(index + 1, to_index)
+        self._bag.pop_last()
+
 
     
-    def table_header(self, text = "") -> None:
-        if text != "":
-            with open(self.file_name + ".txt", "a") as f:
-                f.write("-------+-------+--------\n"+f"{text}".center(24, " ") + "\n")
-            print("-------+-------+--------")
-            print(f"{text}".center(24, " "))
+import os
 
-        with open(self.file_name + ".txt", "a") as f:
-            f.write("-------+-------+--------\nWeight | Value | Content\n-------+-------+--------\n")
-        print("-------+-------+--------")
-        print("Weight | Value | Content")
-        print("-------+-------+--------")
+os.system("cls")
+
+#a = BagItem()
+#a.value = 20
+#a.weight = 100
+#print(a.value_weight_ratio)
+
+#b = Bag()
+#b.append(BagItem())
+#print(b[0])
+
+#i = [1, 2, 3]
+#s = Search(Bag(), i)
+#s.items[0] = 4
+#print(i)
+#print(s.items)
+
+
+bag = Bag(7)
+items = [BagItem(4, 4), BagItem(5, 2), BagItem(3, 6)]
+s = ExhaustiveSearch(bag, items)
+s.search()
+print()
+s.print_node(s[0])
