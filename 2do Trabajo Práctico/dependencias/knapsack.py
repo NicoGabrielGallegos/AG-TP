@@ -1,4 +1,3 @@
-import math # Librería para utilizar operaciones matemáticas
 import copy # Librería para copiar objetos
 
 class BagItem:
@@ -77,6 +76,9 @@ class Bag:
     
     def __setitem__(self, index: int, value: BagItem):
         self._items[index] = value
+    
+    def __len__(self) -> int:
+        return len(self._items)
 
     def append(self, item: BagItem):
         self._items.append(item)
@@ -112,6 +114,10 @@ class Bag:
     def is_valid(self) -> bool:
         return False if self.total_weight > self._max_weight else True
     
+    @property
+    def is_empty(self) -> bool:
+        return True if len(self) == 0 else False
+    
     def __str__(self, colors: bool = True) -> str:
         if colors:
             COLOR_END = "\33[0m"
@@ -131,134 +137,3 @@ class Bag:
         s += f"{BAG_COLOR}){COLOR_END}"
 
         return s
-
-class Search:
-    '''
-    Clase base para implementar algoritmos de
-    búsquedas exhaustivas o heurísticas
-    '''
-
-    def __init__(self, bag: Bag, items: list[BagItem]) -> None:
-        self.bag = bag
-        self.items: list[BagItem] = items
-        self.optimums: list[Bag] = []
-    
-    @property
-    def bag(self) -> Bag:
-        return self._bag
-
-    @bag.setter
-    def bag(self, bag: Bag) -> None:
-        self._bag = bag
-
-    @property
-    def items(self) -> list[BagItem]:
-        return self._items
-
-    @items.setter
-    def items(self, items: list[BagItem]) -> None:
-        self._items = copy.deepcopy(items)
-    
-    @property
-    def item_quantity(self) -> int:
-        return len(self._items)
-
-    @property
-    def node_value(self) -> float:
-        return self._bag.total_value
-    
-    @property
-    def node_items(self) -> float:
-        return self._bag.items
-    
-    @property
-    def optimums(self) -> list[Bag]:
-        return self._optimums
-
-    @optimums.setter
-    def optimums(self, bags: list[Bag]) -> None:
-        self._optimums = bags
-    
-    def __getitem__(self, index: int):
-        return self._optimums[index]
-    
-    def __setitem__(self, index: int, value: BagItem):
-        self._optimums[index] = value
-
-    def append(self, bag: Bag):
-        self._optimums.append(copy.deepcopy(bag))
-
-    
-
-class ExhaustiveSearch(Search):
-    '''
-    Funciones necesarias para resolver un
-    problema de optimización combinatoria
-    '''
-
-    def __init__(self, bag: Bag, items: list[BagItem]) -> None:
-        super().__init__(bag, items)
-
-    def print_node(self, bag: Bag | None = None, colors: bool = True) -> None:
-        if colors:
-            COLOR_END = "\33[0m"
-            if self._bag.is_valid:
-                WEIGHT_COLOR = "\33[95m"
-                VALUE_COLOR = "\33[92m"
-            else:
-                WEIGHT_COLOR = VALUE_COLOR = "\33[90m"
-        else:
-            COLOR_END = WEIGHT_COLOR = VALUE_COLOR = ""
-
-        if bag is None:
-            bag = self._bag
-
-        print(WEIGHT_COLOR + f"{bag.total_weight:6}" + COLOR_END, end=" | ")
-        print(VALUE_COLOR + f"{bag.total_value:5}" + COLOR_END, end=" | ")
-        print(bag.__str__(colors))
-
-    def search(self, from_index: int = 0, to_index: int = -1) -> None:
-        if to_index == -1 or to_index + 1 > len(self.items):
-            to_index = self.item_quantity - 1
-
-        self.print_node()
-        
-        if self._bag.is_valid:
-            if not self._optimums or self._bag.total_value > self[0].total_value:
-                self.optimums = [copy.deepcopy(self._bag)]
-            elif self._bag.total_value == self[0].total_value:
-                self.append(self._bag)
-        
-        for index in range(from_index, to_index + 1):
-            self._bag.append(self._items[index])
-            self.search(index + 1, to_index)
-        self._bag.pop_last()
-
-
-    
-import os
-
-os.system("cls")
-
-#a = BagItem()
-#a.value = 20
-#a.weight = 100
-#print(a.value_weight_ratio)
-
-#b = Bag()
-#b.append(BagItem())
-#print(b[0])
-
-#i = [1, 2, 3]
-#s = Search(Bag(), i)
-#s.items[0] = 4
-#print(i)
-#print(s.items)
-
-
-bag = Bag(7)
-items = [BagItem(4, 4), BagItem(5, 2), BagItem(3, 6)]
-s = ExhaustiveSearch(bag, items)
-s.search()
-print()
-s.print_node(s[0])

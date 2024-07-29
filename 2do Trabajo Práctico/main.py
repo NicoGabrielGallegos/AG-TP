@@ -45,7 +45,7 @@
 
                                                     # Usado para:
 import os                                           # Limpiar la consola
-from pysearch import BagItem, Bag, Search, ExhaustiveSearch, GreedySearch
+from dependencias.pysearch import BagItem, Bag, ExhaustiveSearch, GreedySearch
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Datos iniciales \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 # Objetos del 1er problema
@@ -65,8 +65,9 @@ table_2 = [{"weight": 1800, "value": 72},
            {"weight":  600, "value": 36},
            {"weight": 1200, "value": 60}]
 
-items_1 = [BagItem(table_1[i]["weight"],table_1[i]["value"]) for i in range(len(table_1))]
-items_2 = [BagItem(table_2[i]["weight"],table_2[i]["value"]) for i in range(len(table_2))]
+# Listas de Objetos
+items_1 = [BagItem(table_1[i]["weight"], table_1[i]["value"], str(i)) for i in range(len(table_1))]
+items_2 = [BagItem(table_2[i]["weight"], table_2[i]["value"], str(i)) for i in range(len(table_2))]
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 def program() -> None:
@@ -78,24 +79,28 @@ def program() -> None:
 
 os.system("cls")
 
-bag = Bag(4200)
+bag_1 = Bag(4200)
 
-s = ExhaustiveSearch(bag, items_1, "Results_A")
+s_1A = ExhaustiveSearch(bag_1, items_1)
+s_1A.search()
+s_1A.print_optimums()
+s_1A.export_xlsx_file("Resultado_1A.xlsx")
 
-s.table_header()
-s.evaluate_possibilities()
+s_1B = GreedySearch(bag_1, items_1)
+s_1B.order_by_vwr()
+s_1B.search()
+s_1B.print_optimums()
+s_1B.export_xlsx_file("Resultado_1B.xlsx")
 
-s.table_header("Optimum Candidates")
-for o in s.optimum:
-    s.print_possibility(o)
+bag_2 = Bag(3000)
 
-#bag = Bag(7)
-#items = [BagItem(4, 4), BagItem(5, 2), BagItem(3, 6)]
-#
-#g = GreedySearch(bag, items, "Hola")
-#
-#g.order_by_vwr()
-#
-#g.set_optimum_bag()
-#
-#g.print_optimum()
+s_2A = ExhaustiveSearch(bag_2, items_2)
+s_2A.search()
+s_2A.print_optimums()
+s_2A.export_xlsx_file("Resultado_2A.xlsx")
+
+s_2B = GreedySearch(bag_2, items_2)
+s_2B.order_by_vwr()
+s_2B.search()
+s_2B.print_optimums()
+s_2B.export_xlsx_file("Resultado_2B.xlsx")
