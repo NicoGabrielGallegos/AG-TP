@@ -66,41 +66,38 @@ table_2 = [{"weight": 1800, "value": 72},
            {"weight": 1200, "value": 60}]
 
 # Listas de Objetos
-items_1 = [BagItem(table_1[i]["weight"], table_1[i]["value"], str(i)) for i in range(len(table_1))]
-items_2 = [BagItem(table_2[i]["weight"], table_2[i]["value"], str(i)) for i in range(len(table_2))]
+items_1 = [BagItem(table_1[i]["weight"], table_1[i]["value"], str(i+1)) for i in range(len(table_1))]
+items_2 = [BagItem(table_2[i]["weight"], table_2[i]["value"], str(i+1)) for i in range(len(table_2))]
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
-def program() -> None:
-    pass
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Algoritmo Genético \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
+# Mochilas
+bag_1 = Bag(4200)
+bag_2 = Bag(3000)
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↓↓↓ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
+# Realizar y mostrar la búsqueda
+def exec_search(bag: Bag, items: list[BagItem], type: str = "Exhaustive", name: str = "Resultado") -> None:
+    match type:
+        case "Exhaustive":
+            s = ExhaustiveSearch(bag, items)
+        case "Greedy":
+            s = GreedySearch(bag, items)
+            s.order_by_vwr()
+    s.search()
+    print(f"\nProblema de la mochila - {name}")
+    print("-------+-------+------------")
+    print("  Peso | Valor | Contenido")
+    print("-------+-------+------------")
+    s.print_optimums()
+    s.export_xlsx_file(f"Resultados_{name}.xlsx")
+    print("-------+-------+------------")
+    print(f"Documento \"Resultados_{name}.xlsx\" creado con éxito")
 
 os.system("cls")
 
-bag_1 = Bag(4200)
+exec_search(bag_1, items_1, "Exhaustive", "1A") # Problema 1 - A
+exec_search(bag_1, items_1, "Greedy", "1B")     # Problema 1 - B
+exec_search(bag_2, items_2, "Exhaustive", "2A") # Problema 2 - A
+exec_search(bag_2, items_2, "Greedy", "2B")     # Problema 2 - B
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- ↑↑↑ \ Ejecución \ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-s_1A = ExhaustiveSearch(bag_1, items_1)
-s_1A.search()
-s_1A.print_optimums()
-s_1A.export_xlsx_file("Resultado_1A.xlsx")
-
-s_1B = GreedySearch(bag_1, items_1)
-s_1B.order_by_vwr()
-s_1B.search()
-s_1B.print_optimums()
-s_1B.export_xlsx_file("Resultado_1B.xlsx")
-
-bag_2 = Bag(3000)
-
-s_2A = ExhaustiveSearch(bag_2, items_2)
-s_2A.search()
-s_2A.print_optimums()
-s_2A.export_xlsx_file("Resultado_2A.xlsx")
-
-s_2B = GreedySearch(bag_2, items_2)
-s_2B.order_by_vwr()
-s_2B.search()
-s_2B.print_optimums()
-s_2B.export_xlsx_file("Resultado_2B.xlsx")
+input()

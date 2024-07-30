@@ -123,7 +123,7 @@ class Bag:
             COLOR_END = "\33[0m"
             if self.is_valid:
                 ITEM_COLOR = COLOR_END
-                BAG_COLOR = "\33[94m" # Celeste
+                BAG_COLOR = "\33[94m"
             else:
                 BAG_COLOR = ITEM_COLOR = "\33[90m"
         else :

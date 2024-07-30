@@ -53,7 +53,7 @@ def format(wb: Workbook, items: list[BagItem], type: str = "Exhaustive") -> None
 
 def format_items(ws: Worksheet, rows: int, type: str = "Exhaustive") -> None:
 
-    headers = {'B': "Objeto", 'C': "Peso", 'D': "Valor", 'E': "Peso/Valor"}
+    headers = {'B': "Objeto", 'C': "Peso", 'D': "Valor", 'E': "Valor/Peso"}
     if type == "Greedy":
         _columns.append('E')
 
@@ -104,7 +104,7 @@ def format_items(ws: Worksheet, rows: int, type: str = "Exhaustive") -> None:
 
 def add_item(ws: Worksheet, row: int, item: BagItem) -> None:
 
-    values = { 'B': row-3, 'C': item.weight, 'D': item.value, 'E': item.value_weight_ratio}
+    values = { 'B': row-2, 'C': item.weight, 'D': item.value, 'E': item.value_weight_ratio}
 
     for col in _columns:
         cell: Cell = ws[f'{col}{row}']

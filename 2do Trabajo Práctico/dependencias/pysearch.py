@@ -93,9 +93,6 @@ class Search:
     def export_xlsx_file(self, name: str = "Resultado") -> None:
         self.xlsx_file.save(name)
 
-    #def add_node_xlsx_file(self, row: int, bag: Bag) -> None:
-    #    searchtoxl.add_node(self.xlsx_file["Soluciones"], row, bag)
-
     def add_optimum_node_xlsx_file(self) -> None:
         searchtoxl.add_optimum_node(self.xlsx_file["Soluciones"], self.item_quantity, self._optimums, self._type)
 
