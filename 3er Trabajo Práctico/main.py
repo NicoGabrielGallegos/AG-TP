@@ -47,5 +47,6 @@ ttk.Button(lbl_frm_2, text="Generar recorrido", command=generar_recorrido).grid(
 ttk.Checkbutton(lbl_frm_2, text="Mostrar mapa", variable=chk_map, onvalue=1, offvalue=0).grid(column=1, row=0, padx=2, pady=2, sticky="E")
 txt_recorrido = tk.Text(lbl_frm_2, height=35, width=58)
 txt_recorrido.grid(column=0, row=1, columnspan=2, padx=2, pady=2, sticky="W")
+txt_recorrido.insert(tk.END, f"ID, CIUDAD - DISTANCIA DEL SEGMENTO (DISTANCIA ACUMULADA)")
 
 root.mainloop()

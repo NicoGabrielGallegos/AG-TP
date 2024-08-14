@@ -135,7 +135,7 @@ def mostrar_recorrido_consola(recorrido: list[Ciudad]) -> None:
 def mostrar_recorrido_ttk(txt_area: tk.Text, recorrido: list[Ciudad]) -> None:
     txt_area.delete(1.0, tk.END)
     l = 0
-    txt_area.insert(tk.END, f"ID, CIUDAD - DISTANCIA DEL SEGMENTO (DISTANCIA ACUMULADA)\n")
+    txt_area.insert(tk.END, f"ID, CIUDAD - DISTANCIA DEL SEGMENTO (DISTANCIA ACUMULADA)\n\n")
     for i in range(len(recorrido)):
         d = distancia(recorrido[i], recorrido[i-1])
         l = l + d
