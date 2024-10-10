@@ -3,6 +3,7 @@
 
 # %%
 import random
+import math
 import tkinter as tk
 import tkinter.ttk as ttk
 import matplotlib.pyplot as plt
@@ -198,10 +199,66 @@ def longitud_recorrido(recorrido: list[int]) -> int:
     return l
 
 # %% [markdown]
+# #### Funciones de presentación
+
+# %%
+def mostrar_mapa(recorrido: list[Ciudad]) -> None:
+    img = mpimg.imread("./republica argentina.png")
+
+    x: list[int] = []
+    y: list[int] = []
+
+    for ciudad in recorrido:
+        x.append(ciudad.map_x)
+        y.append(ciudad.map_y)
+
+    plt.figure(1)
+    plt.figure(1).clear()
+    plt.imshow(img, extent=[0, 1035, 0, 1968])
+    plt.plot(x, y, color="#551ABC")
+    plt.plot(x[0], y[0], marker="o", linestyle="none", color="#EFAC5F", mfc="#FFF", ms=8, mew=2)
+    x.pop(0)
+    x.pop()
+    y.pop(0)
+    y.pop()
+    plt.plot(x, y, marker="o", linestyle="none", color="#551ABC", mfc="#FFF", ms=8, mew=2)
+    plt.subplots_adjust(0, 0.001, 1, 1, 0, 0)
+    plt.show()
+
+def mostrar_evolucion_poblaciones(mejores_longitudes: list[int], peores_longitudes: list[int], promedios_longitudes: list[int]) -> None:
+    plt.figure(2)
+    plt.figure(2).clear()
+    x_values = [i for i in range(len(mejores_longitudes))]
+    plt.plot(x_values, peores_longitudes, color="#E52D37", label="Maximo")
+    plt.plot(x_values, promedios_longitudes, color="#064CD8", label="Promedio")
+    plt.plot(x_values, mejores_longitudes, color="#1CA533", label="Minimo")
+    plt.xlabel("Generación")
+    plt.ylabel("Distancia (km)")
+    plt.legend()
+
+def mostrar_recorrido_consola(recorrido: list[Ciudad]) -> None:
+    l = 0
+    for i in range(len(recorrido)):
+        d = distancia(recorrido[i], recorrido[i-1])
+        l = l + d
+        print(f"{i}. {recorrido[i].nombre}, {recorrido[i].provincia} - Distancia parcial: {d}")
+    print(f"Distancia total recorrida: {l}")
+
+def mostrar_recorrido_ttk(txt_area: tk.Text, recorrido: list[Ciudad]) -> None:
+    txt_area.delete(1.0, tk.END)
+    l = 0
+    txt_area.insert(tk.END, f"ID, CIUDAD - DISTANCIA DEL SEGMENTO (DISTANCIA ACUMULADA)\n\n")
+    for i in range(len(recorrido)):
+        d = distancia(recorrido[i].id, recorrido[i-1].id)
+        l = l + d
+        txt_area.insert(tk.END, f"{recorrido[i].id}, {recorrido[i].nombre} - {d} ({l})\n")
+    txt_area.insert(tk.END, f"\nDistancia total recorrida: {l}")
+
+# %% [markdown]
 # #### Funciones Heurísticas
 
 # %%
-def recorrido_minimo_heuristico(partida: int, ciudades: list[int], mascara: list[int] | None = None) -> list[int]:
+def recorrido_heuristico(partida: int, ciudades: list[int], mascara: list[int] | None = None) -> list[int]:
     '''
         Recibe como parámetro una ciudad de partida, una lista de ciudades y una máscara de bits.
 
@@ -218,29 +275,22 @@ def recorrido_minimo_heuristico(partida: int, ciudades: list[int], mascara: list
     recorrido.append(partida)
     return recorrido
 
+def recorrido_minimo_heuristico(partida: int, ciudades: list[int], mascara: list[int] | None = None) -> list[int]:
+    aux = [i for i in mascara]
+    recorrido = recorrido_heuristico(partida, ciudades, mascara)
+    for i in range(len(aux)):
+        if aux[i] == 0:
+            mascara = [i for i in aux]
+            r_aux = recorrido_heuristico(i, ciudades, mascara)
+            if longitud_recorrido(r_aux) < longitud_recorrido(recorrido):
+                recorrido = r_aux
+    recorrido.pop(-1)
+    desplazar_lista(recorrido, recorrido.index(partida))
+    recorrido.append(partida)
+    return recorrido
+
 # %% [markdown]
 # #### Funciones Genéticas
-
-# %%
-# ----------------------------------- PRUEBAS -----------------------------------
-#def fit(c: int, l: list[int]) -> float:
-#    suma: int = 0
-#    for i in l:
-#        suma += i
-#
-#    fit = suma / c
-#
-#    return fit
-#
-#li = [1, 2, 3]
-#suma_fit = 0
-#
-#for i in li:
-#    suma_fit += fit(i, li)
-#    print(f"{i}: {fit(i, li)}")
-#
-#print(suma_fit)
-# ----------------------------------- PRUEBAS -----------------------------------
 
 # %%
 def generar_cromosoma(ciudades: list[int]) -> list[int]:
@@ -257,17 +307,24 @@ def generar_poblacion(n: int, ciudades: list[int]) -> list[list[int]]:
         poblacion.append(generar_cromosoma(ciudades))
     return poblacion
 
-# MAL CALCULADO
-def fitness(cromosoma: list[int], suma_longitudes: int) -> float:
-    return suma_longitudes / longitud_recorrido(cromosoma)
+def fitness(cromosoma: list[int]) -> float:
+    return -longitud_recorrido(cromosoma)
 
-def seleccion(poblacion: list[list[int]], suma_longitudes: int, suma_fitness: float) -> list[int]:
-    seleccionado: float = random.random() * suma_fitness
-    acum: float = 0
-    for cromosoma in poblacion:
-        acum += fitness(cromosoma, suma_longitudes)
-        if acum > seleccionado:
-            return cromosoma
+def seleccion(poblacion: list[list[int]], porcentaje_torneo: float) -> list[int]:
+    indices_disponibles: list[int] = [i for i in range(len(poblacion))]
+    cromosomas_seleccionados: list[int] = []
+
+    for i in range(math.ceil(len(poblacion) * porcentaje_torneo)):
+        indice_aleatorio: int = random.randint(0, len(indices_disponibles) - 1)
+        cromosomas_seleccionados.append(poblacion[indices_disponibles.pop(indice_aleatorio)])
+    
+    mejor_cromosoma: int = cromosomas_seleccionados[0]
+
+    for c in cromosomas_seleccionados:
+        if fitness(c) > fitness(mejor_cromosoma):
+            mejor_cromosoma = c
+
+    return mejor_cromosoma
 
 def crossover_ciclico(padre: list[int], madre: list[int], probabilidad: int = 0.9) -> tuple[list[int], list[int]]:
     if random.random() < probabilidad:
@@ -293,7 +350,7 @@ def crossover_ciclico(padre: list[int], madre: list[int], probabilidad: int = 0.
         hijo_2 = [i for i in madre]
     return (hijo_1, hijo_2)
 
-def mutacion(cromosoma: list[int], genes: int = 2, probabilidad: int = 0.15) -> None:
+def mutacion(cromosoma: list[int], genes: int = 2, probabilidad: int = 0.2) -> None:
     if random.random() < probabilidad:
         indices: list[int] = [(i + 1) for i in range(len(cromosoma) - 1)]
         genes_mezclados: list[int] = []
@@ -306,20 +363,12 @@ def mutacion(cromosoma: list[int], genes: int = 2, probabilidad: int = 0.15) -> 
             cromosoma[genes_mezclados[i]] = cromosoma[genes_mezclados[i + 1]]
         cromosoma[genes_mezclados[-1]] = aux
 
-def siguiente_generacion(poblacion: list[list[int]]) -> list[list[int]]:
+def siguiente_generacion(poblacion: list[list[int]], porcentaje_torneo: float) -> list[list[int]]:
     nueva_poblacion: list[list[int]] = []
 
-    suma_longitudes: int = 0
-    for cromosoma in poblacion:
-        suma_longitudes += longitud_recorrido(cromosoma)
-
-    suma_fitness: float = 0
-    for cromosoma in poblacion:
-        suma_fitness += fitness(cromosoma, suma_longitudes)
-
     for i in range(int(len(poblacion) / 2)):
-        padre = seleccion(poblacion, suma_longitudes, suma_fitness)
-        madre = seleccion(poblacion, suma_longitudes, suma_fitness)
+        padre = seleccion(poblacion, porcentaje_torneo)
+        madre = seleccion(poblacion, porcentaje_torneo)
         hijo_1, hijo_2 = crossover_ciclico(padre, madre)
         mutacion(hijo_1)
         mutacion(hijo_2)
@@ -328,7 +377,7 @@ def siguiente_generacion(poblacion: list[list[int]]) -> list[list[int]]:
 
     return nueva_poblacion
 
-def recorrido_minimo_genetico(partida: int, ciudades: list[int], mascara: list[int], n: int = 50, m: int = 200, mostrar: bool = False):
+def recorrido_minimo_genetico(partida: int, ciudades: list[int], mascara: list[int], n: int = 50, m: int = 200, porcentaje_torneo: float = 0.4):
 
     validar_mascara(mascara, len(ciudades))
     c: list[int]= []
@@ -337,93 +386,26 @@ def recorrido_minimo_genetico(partida: int, ciudades: list[int], mascara: list[i
             c.append(ciudades[i])
 
     poblacion = generar_poblacion(n, c)
+    mejores_longitudes: list[int] = [min([longitud_recorrido(i) for i in poblacion])]
+    peores_longitudes: list[int] = [max([longitud_recorrido(i) for i in poblacion])]
+    promedios_longitudes: list[int] = [sum([longitud_recorrido(i) for i in poblacion]) / len(poblacion)]
 
-    if mostrar:
-        for recorrido in poblacion:
-            print(f"{recorrido}, {longitud_recorrido(recorrido)}")
-    
     for i in range(m):
-        poblacion = siguiente_generacion(poblacion)
-    
-    if mostrar:
-        print("\n")
-        for recorrido in poblacion:
-            print(f"{recorrido}, {longitud_recorrido(recorrido)}")
-    
+        poblacion = siguiente_generacion(poblacion, porcentaje_torneo)
+        mejores_longitudes.append(min([longitud_recorrido(c) for c in poblacion]))
+        peores_longitudes.append(max([longitud_recorrido(i) for i in poblacion]))
+        promedios_longitudes.append(sum([longitud_recorrido(i) for i in poblacion]) / len(poblacion))
+
+    mostrar_evolucion_poblaciones(mejores_longitudes, peores_longitudes, promedios_longitudes)
+
     recorrido = poblacion[0]
     for cromosoma in poblacion:
         if longitud_recorrido(cromosoma) < longitud_recorrido(recorrido):
             recorrido = cromosoma
+            
     desplazar_lista(recorrido, recorrido.index(partida))
     recorrido.append(partida)
     return recorrido
-
-# %% [markdown]
-# #### Funciones Exhaustivas
-
-# %%
-def recorrido_exhaustivo(ciudades: list[int], mascara: list[int] | None = None) -> list[Ciudad]:
-    '''
-        Recibe como parámetro una lista de ciudades y una máscara de enteros.
-
-        Devuelve una aproximación al recorrido exhaustivo verdadero creado a partir de recorridos exhaustivos parciales.
-    '''
-
-
-    pass
-
-def recorrido_exhaustivo_parcial(ciudades: list[int]) -> list[Ciudad]:
-    '''
-        Recibe como parámetro una lista de ciudades (de tamaño aceptable).
-
-        Devuelve el mejor recorrido encontrado a través de una búsqueda exhaustiva.
-    '''
-
-    pass
-
-# %% [markdown]
-# #### Funciones de presentación
-
-# %%
-def mostrar_mapa(recorrido: list[Ciudad]) -> None:
-    img = mpimg.imread("./republica argentina.png")
-
-    x: list[int] = []
-    y: list[int] = []
-
-    for ciudad in recorrido:
-        x.append(ciudad.map_x)
-        y.append(ciudad.map_y)
-
-    plt.imshow(img, extent=[0, 1035, 0, 1968])
-    plt.plot(x, y, color="#551ABC")
-    plt.plot(x[0], y[0], marker="o", linestyle="none", color="#EFAC5F", mfc="#FFF", ms=8, mew=2)
-    x.pop(0)
-    x.pop()
-    y.pop(0)
-    y.pop()
-    plt.plot(x, y, marker="o", linestyle="none", color="#551ABC", mfc="#FFF", ms=8, mew=2)
-    plt.subplots_adjust(0, 0.001, 1, 1, 0, 0)
-    plt.savefig("foo.pdf")
-    plt.show()
-
-def mostrar_recorrido_consola(recorrido: list[Ciudad]) -> None:
-    l = 0
-    for i in range(len(recorrido)):
-        d = distancia(recorrido[i], recorrido[i-1])
-        l = l + d
-        print(f"{i}. {recorrido[i].nombre}, {recorrido[i].provincia} - Distancia parcial: {d}")
-    print(f"Distancia total recorrida: {l}")
-
-def mostrar_recorrido_ttk(txt_area: tk.Text, recorrido: list[Ciudad]) -> None:
-    txt_area.delete(1.0, tk.END)
-    l = 0
-    txt_area.insert(tk.END, f"ID, CIUDAD - DISTANCIA DEL SEGMENTO (DISTANCIA ACUMULADA)\n\n")
-    for i in range(len(recorrido)):
-        d = distancia(recorrido[i].id, recorrido[i-1].id)
-        l = l + d
-        txt_area.insert(tk.END, f"{recorrido[i].id}, {recorrido[i].nombre} - {d} ({l})\n")
-    txt_area.insert(tk.END, f"\nDistancia total recorrida: {l}")
 
 # %% [markdown]
 # ### Presentación
@@ -438,16 +420,9 @@ def generar_recorrido(tipo: str = "Heuristico") -> None:
     ciudades = [i for i in range(CANT_CIUDADES)]
 
     if tipo == "Heuristico":
-        r = recorrido_minimo_heuristico(ciudad_partida.get(), ciudades, mascara)
+        r = recorrido_heuristico(ciudad_partida.get(), ciudades, mascara)
     elif tipo == "Minimo":
-        aux = [i for i in mascara]
         r = recorrido_minimo_heuristico(ciudad_partida.get(), ciudades, mascara)
-        for i in range(len(aux)):
-            if aux[i] == 0:
-                mascara = [i for i in aux]
-                r_aux = recorrido_minimo_heuristico(i, ciudades, mascara)
-                if longitud_recorrido(r_aux) < longitud_recorrido(r):
-                    r = r_aux
     elif tipo == "Genetico":
         r = recorrido_minimo_genetico(ciudad_partida.get(), ciudades, mascara)
     r = [CIUDADES[i] for i in r]
@@ -456,20 +431,20 @@ def generar_recorrido(tipo: str = "Heuristico") -> None:
         mostrar_mapa(r)
 
 root = tk.Tk()
-root.geometry("1100x700")
+root.geometry("1020x650")
 root.title("Problema del Viajante - República Argentina")
 
 frm = ttk.Frame(root)
 frm.grid()
 
 lbl_frm_0 = ttk.Labelframe(frm, text="Ciudad de partida")
-lbl_frm_0.grid(column=0, row=0, padx=16, pady=16, sticky="NW")
+lbl_frm_0.grid(column=0, row=0, padx=16, pady=16)
 
 lbl_frm_1 = ttk.Labelframe(frm, text="Ciudades incluidas en el recorrido")
-lbl_frm_1.grid(column=1, row=0, padx=16, pady=16, sticky="NW")
+lbl_frm_1.grid(column=1, row=0, padx=16, pady=16)
 
 lbl_frm_2 = ttk.Labelframe(frm, text="Resolver")
-lbl_frm_2.grid(column=2, row=0, padx=16, pady=16, sticky="NW")
+lbl_frm_2.grid(column=2, row=0, padx=16, pady=16)
 
 
 ciudades_incluidas = [tk.IntVar() for i in range(CANT_CIUDADES)]
@@ -484,12 +459,12 @@ for i in range(CANT_CIUDADES):
 
 chk_map = tk.IntVar()
 
-ttk.Button(lbl_frm_2, text="Búsqueda Heurística", command=lambda: generar_recorrido("Heuristico")).grid(column=0, row=0, padx=2, pady=2, sticky="W")
-ttk.Button(lbl_frm_2, text="Algoritmo Genético", command=lambda: generar_recorrido("Genetico")).grid(column=0, row=1, padx=2, pady=2, sticky="W")
-ttk.Button(lbl_frm_2, text="Mínimo por búsqueda heurística", command=lambda: generar_recorrido("Minimo")).grid(column=0, row=2, padx=2, pady=2, sticky="W")
-ttk.Checkbutton(lbl_frm_2, text="Mostrar mapa", variable=chk_map, onvalue=1, offvalue=0).grid(column=1, row=0, padx=2, pady=2, sticky="E")
-txt_recorrido = tk.Text(lbl_frm_2, height=35, width=58)
-txt_recorrido.grid(column=0, row=3, columnspan=2, padx=2, pady=2, sticky="W")
+ttk.Button(lbl_frm_2, text="Búsqueda Heurística", command=lambda: generar_recorrido("Heuristico")).grid(column=0, row=0, padx=2, pady=2)
+ttk.Button(lbl_frm_2, text="Mínimo por búsqueda heurística", command=lambda: generar_recorrido("Minimo")).grid(column=1, row=0, padx=2, pady=2)
+ttk.Button(lbl_frm_2, text="Algoritmo Genético", command=lambda: generar_recorrido("Genetico")).grid(column=2, row=0, padx=2, pady=2)
+ttk.Checkbutton(lbl_frm_2, text="Mostrar mapa", variable=chk_map, onvalue=1, offvalue=0).grid(column=0, row=1, padx=2, pady=2)
+txt_recorrido = tk.Text(lbl_frm_2, height=34, width=58)
+txt_recorrido.grid(column=0, row=3, columnspan=3, padx=2, pady=2, sticky="W")
 txt_recorrido.insert(tk.END, f"ID, CIUDAD - DISTANCIA DEL SEGMENTO (DISTANCIA ACUMULADA)")
 
 root.mainloop()
